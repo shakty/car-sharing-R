@@ -265,6 +265,7 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
   }
   #
   DATADIR <- paste0(OVERDIR, 'dump/', SIM, '/')
+  print(DATADIR)
   setwd(DATADIR)
   IMGDIR <- paste0(DATADIR, "img/")
   # Create IMG dir if not existing
