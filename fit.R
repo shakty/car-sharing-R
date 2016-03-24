@@ -20,8 +20,8 @@ datasummary.switch <- summarySE(data, "decision.switch", c("payoff.bus", "car.le
 
 ### LOAD DATA
 
-OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
-RDIR <- paste0(OVERDIR, 'R/')
+# OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
+# RDIR <- paste0(OVERDIR, 'R/')
 
 SIM <- 'b50_c75_rl-2016-3-15-17-29'
 SIM <- 'b50_c75_rl-2016-3-15-21-9'
@@ -102,11 +102,16 @@ SIM <- 'sweep_increase-2016-3-23-23-13'
 SIM <- 'sweep_increase-2016-3-24-14-32'
 ALL <- TRUE
 
-simul <- loadSimul(SIM, ALL=ALL)
 
-library(bigmemory)
-DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
-simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
+############## LOAD SIMULATION ################
+simul <- loadSimul(SIM, ALL=ALL)
+###############################################
+
+# library(bigmemory)
+# DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
+# simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
+
+############# COMPUTE FIT ######################
 
 mydata <- simul[simul$increase.shock == 1,]
 fits <- computeFit(mydata)
@@ -117,6 +122,7 @@ for (s in unique(simul$increase.shock)) {
     fits <- rbind(fits, fit)
   }
 }
+###############################################
 
 # fits.melted <- melt(fits, c("S1", "epsilon", "phi",  "rho1",
 #                             "wPlus", "wMinus", "upsilon", "increase.shock", "decrease.shock",
@@ -127,7 +133,9 @@ p <- p + geom_bar(stat="identity", position="dodge")
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Bus Takers')
 p <- p + ggtitle(paramsInTitle)
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__sw-bus.jpg')
@@ -140,7 +148,9 @@ p <- p + geom_bar(stat="identity", position="dodge")
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Departure Time Car')
 p <- p + ggtitle(paramsInTitle)
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__rl-bus.jpg')
@@ -151,7 +161,9 @@ p <- p + geom_bar(stat="identity", position="dodge")
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Switches')
 p <- p + ggtitle(paramsInTitle)
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__rl-bus.jpg')
@@ -204,7 +216,9 @@ p <- p + scale_color_discrete(name='Payoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
 p <- p + ggtitle(paste0(paramsInTitle, '\nBus Takers'))
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-bus.jpg')
@@ -230,7 +244,9 @@ p <- p + scale_color_discrete(name='Payoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
 p <- p + ggtitle(paste0(paramsInTitle, '\nCar Departure Time'))
-p
+if (!CLUSTER) {
+  p
+}
 
 
 # Saving file.
@@ -257,7 +273,9 @@ p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
 p <- p + ggtitle(paste0(paramsInTitle, '\nNormalized payoffs by round'))
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-norm_payoff.jpg')
@@ -283,7 +301,9 @@ p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
 p <- p + ggtitle(paste0(paramsInTitle, '\n Car payoffs by round'))
-p
+if (!CLUSTER) {
+  p
+}
 
 # Saving file.
 filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-payoff-car.jpg')
@@ -325,7 +345,9 @@ p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
 p <- p + ggtitle(paste0(paramsInTitle, '\nStrategy Switching by round'))
-p
+if (!CLUSTER) {
+  p
+}
 
 
 # Saving file.
@@ -333,29 +355,29 @@ filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-switch.jpg')
 ggsave(filepath)
 
 
-## S1
-
-P = "S1"
-
-PHI = 0
-EPSILON = 0
-doPlots(P, PHI, EPSILON)
-
-
-PHI = 0.1
-EPSILON = 0
-doPlots(P, PHI, EPSILON)
-
-
-PHI = 0.01
-EPSILON = 0
-doPlots(P, PHI, EPSILON)
-
-PHI = 0
-EPSILON = 0.4
-doPlots(P, PHI, EPSILON)
-
-# INCREASE
-
-P = "increase.shock"
-doPlotsIncrease(P)
+# ## S1
+# 
+# P = "S1"
+# 
+# PHI = 0
+# EPSILON = 0
+# doPlots(P, PHI, EPSILON)
+# 
+# 
+# PHI = 0.1
+# EPSILON = 0
+# doPlots(P, PHI, EPSILON)
+# 
+# 
+# PHI = 0.01
+# EPSILON = 0
+# doPlots(P, PHI, EPSILON)
+# 
+# PHI = 0
+# EPSILON = 0.4
+# doPlots(P, PHI, EPSILON)
+# 
+# # INCREASE
+# 
+# P = "increase.shock"
+# doPlotsIncrease(P)
