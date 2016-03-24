@@ -318,6 +318,7 @@ if (!file.exists(OVERDIR)) {
 
 RDIR <- paste0(OVERDIR, 'R/')
 DATADIR <- paste0(OVERDIR, 'data/ALL/')
+print(DATADIR)
 setwd(DATADIR)
 IMGDIR <- paste0(DATADIR, "img/")
 # Create IMG dir if not existing
