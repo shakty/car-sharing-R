@@ -1,4 +1,5 @@
-source("/home/stefano/kaycar/R/init.R")
+# /home/stefano/kaycar/R/
+source("init.R")
 
 # Statistics about the experiment.
 stats <- makeStats(data)
