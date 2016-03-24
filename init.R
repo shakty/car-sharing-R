@@ -259,6 +259,10 @@ doPlotsIncrease <- function(P) {
 ### LOAD SIMUL DIR
 
 loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/') {
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+  }
   #
   DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
   setwd(DATADIR)
@@ -304,7 +308,13 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
 
 ### LOAD DATA
 
+
 OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
+if (!file.exists(OVERDIR)) {
+  # We are on the cluster.
+  OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+}
+
 RDIR <- paste0(OVERDIR, 'R/')
 DATADIR <- paste0(OVERDIR, 'data/ALL/')
 setwd(DATADIR)
