@@ -258,13 +258,13 @@ doPlotsIncrease <- function(P) {
 
 ### LOAD SIMUL DIR
 
-loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/') {
+loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
   if (!file.exists(OVERDIR)) {
     # We are on the cluster.
     OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
   }
   #
-  DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
+  DATADIR <- paste0(OVERDIR, 'dump/', SIM, '/')
   setwd(DATADIR)
   IMGDIR <- paste0(DATADIR, "img/")
   # Create IMG dir if not existing
