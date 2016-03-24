@@ -308,11 +308,12 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
 
 ### LOAD DATA
 
-
+CLUSTER <- 0
 OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
 if (!file.exists(OVERDIR)) {
   # We are on the cluster.
   OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+  CLUSTER <- 1
 }
 
 RDIR <- paste0(OVERDIR, 'R/')
