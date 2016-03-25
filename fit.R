@@ -1,6 +1,4 @@
-
-                                        # /home/stefano/kaycar/R/
-source("init.R")
+source("init.R") # /home/stefano/kaycar/R/
 
 # Statistics about the experiment.
 stats <- makeStats(data)
@@ -131,6 +129,29 @@ if (FITS.NOW) {
   }
 }
 
+
+# PLOTS variables.
+
+if ("init" %in% colnames(simul)) {
+  init = simul[1,]$init
+} else {
+  init = 'NA'
+}
+  
+paramsInTitle <- paste0('S1=', simul[1,]$S1, ' e=', simul[1,]$epsilon,
+                        ' phi=', simul[1,]$phi, ' rho1=', simul[1,]$rho1,
+                        '\nw+=', simul[1,]$wPlus, ' w-=', simul[1,]$wMinus,
+                        ' t+=', simul[1,]$increase.shock, ' t-=', simul[1,]$decrease.shock,
+                        ' i=', simul[1,]$interval, ' I=', init)
+
+paramsInFilename <- paste0('S1=', simul[1,]$S1, '_e=', simul[1,]$epsilon,
+                           '_phi=', simul[1,]$phi, '_rho1=', simul[1,]$rho1,
+                           '_w+=', simul[1,]$wPlus, '_w-=', simul[1,]$wMinus,
+                           '_t+=', simul[1,]$increase.shock, '_t-=', simul[1,]$decrease.shock,
+                           '_i=', simul[1,]$interval, '_I=', init)
+
+#######################
+
 #
 # fits.melted <- melt(fits, c("S1", "epsilon", "phi",  "rho1",
 #                             "wPlus", "wMinus", "upsilon", "increase.shock", "decrease.shock",
@@ -186,27 +207,6 @@ if (FITS.NOW) {
 
 # Fit
 fit <- computeFit(simul); fit
-
-# PLOTS
-
-if ("init" %in% colnames(simul)) {
-  init = simul[1,]$init
-} else {
-  init = 'NA'
-}
-  
-paramsInTitle <- paste0('S1=', simul[1,]$S1, ' e=', simul[1,]$epsilon,
-                        ' phi=', simul[1,]$phi, ' rho1=', simul[1,]$rho1,
-                        '\nw+=', simul[1,]$wPlus, ' w-=', simul[1,]$wMinus,
-                        ' t+=', simul[1,]$increase.shock, ' t-=', simul[1,]$decrease.shock,
-                        ' i=', simul[1,]$interval, ' I=', init)
-
-paramsInFilename <- paste0('S1=', simul[1,]$S1, '_e=', simul[1,]$epsilon,
-                           '_phi=', simul[1,]$phi, '_rho1=', simul[1,]$rho1,
-                           '_w+=', simul[1,]$wPlus, '_w-=', simul[1,]$wMinus,
-                           '_t+=', simul[1,]$increase.shock, '_t-=', simul[1,]$decrease.shock,
-                           '_i=', simul[1,]$interval, '_I=', init)
-
 
 # Decision Car/Bus (in time)
 ############################
