@@ -167,7 +167,7 @@ if (!CLUSTER) {
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__sw-bus.jpg')
+filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-bus.jpg')
 ggsave(filepath)
 
 
@@ -182,7 +182,7 @@ if (!CLUSTER) {
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__rl-bus.jpg')
+filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-time.jpg')
 ggsave(filepath)
 
 p <- ggplot(fits, aes(decrease.shock, msd.switch, fill=payoff.bus), color="white")
@@ -195,11 +195,12 @@ if (!CLUSTER) {
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__rl-bus.jpg')
+filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-switch.jpg')
 ggsave(filepath)
 
 
 if (FITS.NOW) {
+  print('FITS.NOW: not doing more plots...')
   q()
 }
 
