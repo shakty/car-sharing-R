@@ -258,6 +258,7 @@ doPlotsIncrease <- function(P) {
 
 ### LOAD SIMUL DIR
 
+
 loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
   if (!file.exists(OVERDIR)) {
     # We are on the cluster.
@@ -282,6 +283,73 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
       tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'), sep=",", header=TRUE)
       data <- rbind(data, tmp)
     }
+  } else {
+    data <- read.table(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
+  }
+  # Decorate simulation data.
+  data$decision <- as.factor(data$decision)
+  data$got.car <- as.factor(data$got.car)
+  data$car.level <- as.factor(data$car.level)
+  data$payoff.bus <- as.factor(data$payoff.bus)
+  data$payoff.car <- as.factor(30)
+  data$player <- paste0(data$session, '-', data$repetition, '-', data$player)
+  #
+  # Dep 2
+  data$decision <- ifelse(data$decision == 1, "bus", "car")
+  data$departure.time.2 <- ifelse(data$decision == "bus", -5, data$departure.time)
+  data$bus <- ifelse(data$decision == "bus", 1, 0)
+  data$player.short <- data$player
+  data$tried.car.got.it <- as.factor(ifelse(data$decision == "car" & data$got.car == 0, 0, 1))
+  data$payoff.adjusted <- ifelse(data$decision == "bus", 50, data$payoff)
+  data$car.level.num <- ifelse(data$car.level == "25", 0.25, ifelse(data$car.level == "50", 0.5, 0.75))
+  data$istimeout.decision <- 0
+  sessions <- unique(data$session)
+  #
+  return(data)
+}
+
+
+loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  library(parallel)
+  #
+  # Calculate the number of cores
+  no_cores <- detectCores() - 1
+  #
+  # Initiate cluster
+  cl <- makeCluster(no_cores)
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+  }
+  #
+  DATADIR <- paste0(OVERDIR, 'dump/', SIM, '/')
+  print(DATADIR)
+  setwd(DATADIR)
+  IMGDIR <- paste0(DATADIR, "img/")
+  # Create IMG dir if not existing
+  if (!file.exists(IMGDIR)) {
+    dir.create(file.path(IMGDIR))
+  }
+  #
+  if (!ALL) {
+    data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
+    filenames <- list.files(DATADIR, pattern="*.csv")
+    nFiles <- length(filenames)
+    print(paste0("Files found: ", nFiles))
+    #
+    # Exporting data to cluster.
+    clusterExport(cl, "data")
+    #
+    parLapply(cl,
+              seq(2,(nFiles-1)),
+              function(n) {
+                tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'),
+                                  sep=",", header=TRUE)
+                data <- rbind(data, tmp)
+              })
+    stopCluster(cl)
   } else {
     data <- read.table(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
   }
