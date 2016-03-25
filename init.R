@@ -10,7 +10,7 @@ theme_set(theme_bw(base_size = 20))
 
 myThemeMod <- theme(axis.title.x = element_text(vjust=-1, size=24),
                     axis.title.y = element_text(vjust=-0.1, size=24),
-                    plot.margin=unit(c(10,10,10,10),"mm"),                    
+                    plot.margin=unit(c(10,10,10,10),"mm"),
                     plot.title = element_text(vjust=3, size=24,face="bold"),
                     legend.background = element_rect(fill = "white", color="grey"),
                     legend.title = element_blank(),
@@ -49,13 +49,13 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE, conf.i
                     na.rm
              )
 
-    # Rename the "mean" column    
+    # Rename the "mean" column
     datac <- rename(datac, c("mean"=measurevar))
 
     datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
 
     # Confidence interval multiplier for standard error
-    # Calculate t-statistic for confidence interval: 
+    # Calculate t-statistic for confidence interval:
     # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
     ciMult <- qt(conf.interval/2 + .5, datac$N-1)
     datac$ci <- datac$se * ciMult
@@ -87,7 +87,6 @@ plotPlayerDecisionsByRound <- function(mydata, filepath=FALSE) {
   }
 }
 
-
 # Computes macro statistics on the avg. bus, time for car, and switching.
 makeStats <- function(data, write = FALSE) {
   #
@@ -107,9 +106,12 @@ makeStats <- function(data, write = FALSE) {
   stats.time$sd <- NULL
   stats.time$se <- NULL
   stats.time$N <- NULL
-  colnames(stats.time) <- c("payoff.bus","car.level", "round", "time", "time.ci" )
-  #  
+  colnames(stats.time) <- c("payoff.bus","car.level", "round", "time", "time.ci")
+  #
   if (!("decision.switch" %in% colnames(data))) {
+    payoff.bus <- ifelse(as.numeric(data[1,]$payoff.bus) == 1, 50, 70)
+    cnum <- as.numeric(data[1,]$car.level)
+    car.level <- ifelse(cnum == 1, 25, ifelse(cnum == 2, 50, 70))
     library(plm)
     #
     pdata <- pdata.frame(data, index=c('player','round'))
@@ -125,8 +127,15 @@ makeStats <- function(data, write = FALSE) {
     pdata$got.car.lag <- lag(pdata$got.car, 1)
     #
     data <- as.data.frame(pdata)
-    data$round <- as.numeric(data$round)  
+    data$round <- as.numeric(data$round)
     data$decision.switch <- ifelse(data$decision != data$decision.lag, 1, 0)
+
+    if (!("payoff.bus" %in% data)) {
+      data$payoff.bus <- payoff.bus
+    }
+    if (!("car.level" %in% data)) {
+      data$car.level <- car.level
+    }
   }
   stats.switch <- summarySE(data, "decision.switch",
                             c("payoff.bus", "car.level", "round"), na.rm=TRUE)
@@ -136,7 +145,7 @@ makeStats <- function(data, write = FALSE) {
   stats.switch$se <- NULL
   stats.switch$N <- NULL
   colnames(stats.switch) <- c("payoff.bus","car.level", "round", "switch", "switch.ci" )
-  #  
+  #
   stats <- merge(stats.bus, stats.time, by=c("payoff.bus","car.level", "round"))
   stats <- merge(stats, stats.switch, by=c("payoff.bus","car.level", "round"))
   #
@@ -174,7 +183,7 @@ computeFit <- function(data) {
   a <- cbind(a, msd.bus[,c(1,2,4)])
   a <- cbind(a, msd.time[,4])
   a <- cbind(a, msd.switch[,4])
-  #  
+  #
   colnames(a) <- c("init", "S1", "epsilon", "phi", "rho1", "wPlus", "wMinus",
                    "upsilon", "increase.shock", "decrease.shock",
                    "interval", "payoff.bus", "car.level", "msd.bus",
@@ -220,7 +229,7 @@ doPlots <- function(P, PHI, EPSILON) {
   #
   p <- ggplot(comparison, aes(S1, msd.switch, color=S1, fill=S1))
   p <- p + geom_bar(alpha=0.5, position="dodge", stat="identity")
-  p <- p + facet_grid(payoff.bus ~ car.level)  
+  p <- p + facet_grid(payoff.bus ~ car.level)
   p <- p + ggtitle(title)
   #
   ggsave(paste0(IMGDIR, 'switch_', title,  '.png'))
@@ -250,7 +259,7 @@ doPlotsIncrease <- function(P) {
   #
   p <- ggplot(comparison, aes(increase.shock, msd.switch, color=S1, fill=S1))
   p <- p + geom_bar(alpha=0.5, position="dodge", stat="identity")
-  p <- p + facet_grid(payoff.bus ~ car.level)  
+  p <- p + facet_grid(payoff.bus ~ car.level)
   p <- p + ggtitle(title)
   #
   ggsave(paste0(IMGDIR, 'switch_', title,  '.png'))
@@ -262,10 +271,10 @@ doPlotsIncrease <- function(P) {
 loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
   if (!file.exists(OVERDIR)) {
     # We are on the cluster.
-    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
   }
   #
-  DATADIR <- paste0(OVERDIR, 'dump/', SIM, '/')
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
   print(DATADIR)
   setwd(DATADIR)
   IMGDIR <- paste0(DATADIR, "img/")
@@ -286,6 +295,11 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
   } else {
     data <- read.table(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
   }
+  data <- decorateData(data)
+  return(data)
+}
+
+decorateData <- function(data) {
   # Decorate simulation data.
   data$decision <- as.factor(data$decision)
   data$got.car <- as.factor(data$got.car)
@@ -308,7 +322,6 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
   return(data)
 }
 
-
 loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
   #
   library(parallel)
@@ -321,10 +334,10 @@ loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypape
   #
   if (!file.exists(OVERDIR)) {
     # We are on the cluster.
-    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
   }
   #
-  DATADIR <- paste0(OVERDIR, 'dump/', SIM, '/')
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
   print(DATADIR)
   setwd(DATADIR)
   IMGDIR <- paste0(DATADIR, "img/")
@@ -373,6 +386,219 @@ loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypape
   sessions <- unique(data$session)
   #
   return(data)
+}
+
+loadFitsOld <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  library(parallel)
+  #
+  # Calculate the number of cores
+  no_cores <- detectCores() - 1
+  #
+  # Initiate cluster
+  cl <- makeCluster(no_cores)
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
+  }
+  #
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
+  print(DATADIR)
+  setwd(DATADIR)
+  IMGDIR <- paste0(DATADIR, "img/")
+  # Create IMG dir if not existing
+  if (!file.exists(IMGDIR)) {
+    dir.create(file.path(IMGDIR))
+  }
+  #
+  if (!ALL) {
+    # data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
+    filenames <- list.files(DATADIR, pattern="*.csv")
+    nFiles <- length(filenames)
+    print(paste0("Files found: ", nFiles))
+    #
+    # Exporting data to cluster.
+    data <- data.frame()
+    fits <- data.frame()
+    clusterExport(cl, "data")
+    clusterExport(cl, "fits")
+    #
+    parLapply(cl,
+              seq(1,18),
+              function(n) {
+                tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'),
+                                  sep=",", header=TRUE)
+                if (!exists("data")) {
+                  data <- tmp
+                } else {
+                  data <- rbind(data, tmp)
+                }
+                # Comput
+                if (n %% 6 == 0) {
+                  myfit <- computeFit(data)
+                  if (!exists("fits")) {
+                    fits <- myfits
+                  } else {
+                    fits <- rbind(fits, myfits)
+                  }
+                  data <- NULL
+                }
+              })
+    stopCluster(cl)
+  } else {
+    data <- read.table(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
+  }
+  return(fits)
+#   # Decorate simulation data.
+#   data$decision <- as.factor(data$decision)
+#   data$got.car <- as.factor(data$got.car)
+#   data$car.level <- as.factor(data$car.level)
+#   data$payoff.bus <- as.factor(data$payoff.bus)
+#   data$payoff.car <- as.factor(30)
+#   data$player <- paste0(data$session, '-', data$repetition, '-', data$player)
+#   #
+#   # Dep 2
+#   data$decision <- ifelse(data$decision == 1, "bus", "car")
+#   data$departure.time.2 <- ifelse(data$decision == "bus", -5, data$departure.time)
+#   data$bus <- ifelse(data$decision == "bus", 1, 0)
+#   data$player.short <- data$player
+#   data$tried.car.got.it <- as.factor(ifelse(data$decision == "car" & data$got.car == 0, 0, 1))
+#   data$payoff.adjusted <- ifelse(data$decision == "bus", 50, data$payoff)
+#   data$car.level.num <- ifelse(data$car.level == "25", 0.25, ifelse(data$car.level == "50", 0.5, 0.75))
+#   data$istimeout.decision <- 0
+#   sessions <- unique(data$session)
+#  #
+#  return(data)
+}
+
+loadFits <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  library(parallel)
+  #
+  # Calculate the number of cores
+  no_cores <- detectCores() - 1
+  #
+  # Initiate cluster
+  cl <- makeCluster(no_cores)
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
+  }
+  #
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
+  print(DATADIR)
+  setwd(DATADIR)
+  IMGDIR <- paste0(DATADIR, "img/")
+  # Create IMG dir if not existing
+  if (!file.exists(IMGDIR)) {
+    dir.create(file.path(IMGDIR))
+  }
+  #
+  clusterExport(cl, "computeFit")
+  clusterExport(cl, "stats")
+  clusterExport(cl, "summarySE")
+  clusterExport(cl, "makeStats")
+  clusterExport(cl, "ddply")
+  clusterExport(cl, "decorateData")
+  clusterExport(cl, "rename")
+  filenames <- list.files(DATADIR, pattern="*.csv")
+  nFiles <- length(filenames)
+  print(paste0("Files found: ", nFiles))
+  #
+  start.time <- Sys.time()
+  fits <- parLapply(cl,
+                    seq(1,6),
+                    function(n) {
+                      tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'),
+                                        sep=",", header=TRUE)
+                      tmp <- decorateData(tmp)
+                      myfit <- computeFit(tmp)
+                    })
+  stopCluster(cl)
+  #
+  fits <- do.call(rbind.data.frame, fits)
+  total.time <- Sys.time() - start.time
+  print(paste0("LoadFits Execution time: ", total.time))
+  #
+  return(fits)  
+}
+
+loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
+  }
+  #
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
+  print(DATADIR)
+  setwd(DATADIR)
+  IMGDIR <- paste0(DATADIR, "img/")
+  # Create IMG dir if not existing
+  if (!file.exists(IMGDIR)) {
+    dir.create(file.path(IMGDIR))
+  }
+  #
+  filenames <- list.files(DATADIR, pattern="*.csv")
+  nFiles <- length(filenames)
+  print(paste0("Files found: ", nFiles))
+  #
+  start.time <- Sys.time()
+  fits <- lapply(seq(1,6),
+                 function(n) {
+                   tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'),
+                                     sep=",", header=TRUE)
+                   tmp <- decorateData(tmp)
+                   myfit <- computeFit(tmp)
+                 })
+  #
+  fits <- do.call(rbind.data.frame, fits)
+  total.time <- Sys.time() - start.time
+  print(paste0("LoadFitsSync Execution time: ", total.time))
+  #
+  return(fits)
+}
+
+loadFitsForLoop <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
+  }
+  #
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
+  print(DATADIR)
+  setwd(DATADIR)
+  IMGDIR <- paste0(DATADIR, "img/")
+  # Create IMG dir if not existing
+  if (!file.exists(IMGDIR)) {
+    dir.create(file.path(IMGDIR))
+  }
+  #
+  filenames <- list.files(DATADIR, pattern="*.csv")
+  nFiles <- length(filenames)
+  print(paste0("Files found: ", nFiles))
+  #
+  start.time <- Sys.time()
+  ns <- seq(1,6)
+  for (n in ns) {
+    tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'),
+                      sep=",", header=TRUE)
+    tmp <- decorateData(tmp)
+    myfit <- computeFit(tmp)
+    if (!exists("tmp.fits")) {
+      tmp.fits <- myfit
+    } else {
+      tmp.fits <- rbind(tmp.fits, myfit)
+    }
+  }
+  #
+  total.time <- Sys.time() - start.time
+  print(paste0("LoadFitsForLoop Execution time: ", total.time))
+  #
+  return(tmp.fits)
 }
 
 ### LOAD DATA
@@ -442,7 +668,7 @@ computeStrike <- function(row, previousValue) {
   if (is.na(decision.switch)) {
     return(NA)
   }
-  #  
+  #
   if (is.na(previousValue)) {
     previousValue = 0
   }

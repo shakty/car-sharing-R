@@ -103,6 +103,9 @@ SIM <- 'sweep_increase-2016-3-23-23-13'
 SIM <- 'sweep_increase-2016-3-24-14-32'
 ALL <- TRUE
 
+############## LOAD FITS ################
+fits <- loadFitsSync(SIM)
+###############################################
 
 ############## LOAD SIMULATION ################
 simul <- loadSimul(SIM, ALL=ALL)
