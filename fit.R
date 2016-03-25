@@ -132,23 +132,23 @@ if (FITS.NOW) {
 
 # PLOTS variables.
 
-if ("init" %in% colnames(simul)) {
-  init = simul[1,]$init
+if ("init" %in% colnames(fits)) {
+  init = fits[1,]$init
 } else {
   init = 'NA'
 }
   
-paramsInTitle <- paste0('S1=', simul[1,]$S1, ' e=', simul[1,]$epsilon,
-                        ' phi=', simul[1,]$phi, ' rho1=', simul[1,]$rho1,
-                        '\nw+=', simul[1,]$wPlus, ' w-=', simul[1,]$wMinus,
-                        ' t+=', simul[1,]$increase.shock, ' t-=', simul[1,]$decrease.shock,
-                        ' i=', simul[1,]$interval, ' I=', init)
+paramsInTitle <- paste0('S1=', fits[1,]$S1, ' e=', fits[1,]$epsilon,
+                        ' phi=', fits[1,]$phi, ' rho1=', fits[1,]$rho1,
+                        '\nw+=', fits[1,]$wPlus, ' w-=', fits[1,]$wMinus,
+                        ' t+=', fits[1,]$increase.shock, ' t-=', fits[1,]$decrease.shock,
+                        ' i=', fits[1,]$interval, ' I=', init)
 
-paramsInFilename <- paste0('S1=', simul[1,]$S1, '_e=', simul[1,]$epsilon,
-                           '_phi=', simul[1,]$phi, '_rho1=', simul[1,]$rho1,
-                           '_w+=', simul[1,]$wPlus, '_w-=', simul[1,]$wMinus,
-                           '_t+=', simul[1,]$increase.shock, '_t-=', simul[1,]$decrease.shock,
-                           '_i=', simul[1,]$interval, '_I=', init)
+paramsInFilename <- paste0('S1=', fits[1,]$S1, '_e=', fits[1,]$epsilon,
+                           '_phi=', fits[1,]$phi, '_rho1=', fits[1,]$rho1,
+                           '_w+=', fits[1,]$wPlus, '_w-=', fits[1,]$wMinus,
+                           '_t+=', fits[1,]$increase.shock, '_t-=', fits[1,]$decrease.shock,
+                           '_i=', fits[1,]$interval, '_I=', init)
 
 #######################
 
