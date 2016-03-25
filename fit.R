@@ -1,4 +1,5 @@
-# /home/stefano/kaycar/R/
+
+                                        # /home/stefano/kaycar/R/
 source("init.R")
 
 # Statistics about the experiment.
@@ -103,31 +104,34 @@ SIM <- 'sweep_increase-2016-3-23-23-13'
 SIM <- 'sweep_increase-2016-3-24-14-32'
 ALL <- TRUE
 
-############## LOAD FITS ################
-fits <- loadFitsSync(SIM)
-###############################################
+FITS.NOW <- TRUE
 
-############## LOAD SIMULATION ################
-simul <- loadSimul(SIM, ALL=ALL)
-###############################################
-
-# library(bigmemory)
-# DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
-# simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
-
-############# COMPUTE FIT ######################
-
-mydata <- simul[simul$increase.shock == 1,]
-fits <- computeFit(mydata)
-for (s in unique(simul$increase.shock)) {
-  if (s != 1) {
-    mydata <- simul[simul$increase.shock == s,]
-    fit <- computeFit(mydata);
-    fits <- rbind(fits, fit)
+if (FITS.NOW) {
+  ############## LOAD FITS ################
+  fits <- loadFitsSync(SIM)
+  ###############################################
+} else {
+  ############## LOAD SIMULATION ################
+  simul <- loadSimul(SIM, ALL=ALL)
+  ###############################################
+  #
+  # library(bigmemory)
+  # DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
+  # simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
+  #
+  ############# COMPUTE FIT ######################
+  mydata <- simul[simul$increase.shock == 1,]
+  fits <- computeFit(mydata)
+  for (s in unique(simul$increase.shock)) {
+    if (s != 1) {
+      mydata <- simul[simul$increase.shock == s,]
+      fit <- computeFit(mydata);
+      fits <- rbind(fits, fit)
+    }
   }
 }
-###############################################
 
+#
 # fits.melted <- melt(fits, c("S1", "epsilon", "phi",  "rho1",
 #                             "wPlus", "wMinus", "upsilon", "increase.shock", "decrease.shock",
 #                            "interval", "payoff.bus", "car.level"))
@@ -174,6 +178,11 @@ filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__rl-bus.jpg')
 ggsave(filepath)
 
 
+if (FITS.NOW) {
+  q()
+}
+
+#####################
 
 # Fit
 fit <- computeFit(simul); fit
