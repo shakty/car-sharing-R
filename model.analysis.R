@@ -3,7 +3,6 @@ source("/home/stefano/kaycar/R/init.R")
 
 # Statistics about the experiment.
 
-
 stats <- makeStats(data)
 
 # Initial Values
@@ -25,6 +24,8 @@ p <- p + geom_bar(position="dodge", stat="bin")
 p <- p + facet_grid(~payoff.bus)
 p
 
+
+
 # Not significantly different.
 ks.test(mydata[mydata$payoff.bus == 50,]$departure.time, mydata[mydata$payoff.bus == 70,]$departure.time)
 
@@ -37,6 +38,44 @@ p <- p + geom_bar(position="dodge", stat="bin")
 p <- p + facet_grid(~payoff.bus)
 p
 
+# I don't understand why this fails. We need 61 frequency classes, but we get just 60.
+h <- hist(mydata[mydata$payoff.bus == 50,]$departure.time, seq(0,60)); h$counts
+h <- hist(mydata[mydata$payoff.bus == 70,]$departure.time, 63); h$counts
+
+# This works.
+aa = c()
+for (r in seq(0,60)) {
+  aa = c(aa, nrow(mydata[mydata$payoff.bus == 50 & mydata$departure.time == r,]))
+}
+
+aa2 =(aa/sum(aa))*20
+for (r in seq(1,61)) {
+  if (aa2[[r]] < 1) {
+    if (aa2[[r]] > 0.25) {
+      aa2[[r]] = 1
+    } else {
+      aa2[[r]] = 0
+    }
+  } else {
+    aa2[[r]] = ceiling(aa2[r])
+  }    
+}
+sum(aa2)
+
+# If we had 20 people how would they distribute.
+
+# BUS = 70
+# 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 1 0 0 0 0 0 0
+# 0 0 1 0 0 0 0 2 0 0 0 0 1 0 0 0 0 1 0 0 1 0 6
+# Or as a vector (61 = 1h)
+# 1 1 1 1 31 31 31 32 41 46 46 51 56 59 61 61 61 61 61 61
+
+# BUS = 50
+# 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 X 0 0 0 0 1 0 0 0 0 0 0 0 0 0 3 0 0 0 0 X 0 0
+# 0 X 1 0 0 0 0 2 0 0 0 0 1 0 0 0 0 1 0 0 0 0 7 (Xs are equally probable 20th, 21st, 22nd)
+# Or as a vector (61 = 1h)
+# 1 1 1 21 31 31 31 41 46 46 51 56 61 61 61 61 61 61 61 # sure numbers
+# 16 36 40 # numbers with X
 
 # 1 DEPARTURE TIME
 
@@ -407,6 +446,28 @@ ggsave(paste0(IMGDIR, 'car2bus_got-car_round.jpg'))
 # Conversely, the effect of getting a car decreases over rounds, and only in car.level = 0.25
 #   and bus.payoff=50 is always the same.
 
+# 2.4 CAR-2-BUS VS GOT-CAR vs PAYOFF
+
+mysummary <- summarySE(data, "car2bus", c("got.car.chose.car.lag",
+                                          "payoff.bus",
+                                          "car.level",
+                                          "payoff.lag.cut"), na.rm = TRUE)
+
+p <- ggplot(na.omit(mysummary), aes(as.factor(got.car.chose.car.lag), car2bus, fill=round.cut))
+p <- p + geom_bar(stat="identity", position="dodge", color="white")
+p <- p + geom_errorbar(aes(ymin=car2bus -ci, ymax=car2bus + ci),
+                       position="dodge", color="black")
+p <- p + facet_grid(payoff.bus~car.level)
+p <- p + xlab('Got-Car (or not) in previous round') +  ylab('Fraction of people who switched to bus')
+p
+
+
+ggsave(paste0(IMGDIR, 'car2bus_got-car_round.jpg'))
+
+# In general, non-getting a car has the same effect in all rounds. Only in car.level = 0.75,
+#   and bus.payoff=50 in the first 5 rounds it has a bigger effect.
+# Conversely, the effect of getting a car decreases over rounds, and only in car.level = 0.25
+#   and bus.payoff=50 is always the same.
 
 # 3. ACTUAL CAR PAYOFF
 

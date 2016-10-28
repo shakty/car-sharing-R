@@ -11,3 +11,5 @@ data
 *.tar.gz
 
 lsf.*
+
+.Rhistory

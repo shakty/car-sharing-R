@@ -102,7 +102,23 @@ SIM <- 'sweep_increase-2016-3-23-23-13'
 SIM <- 'sweep_increase-2016-3-24-14-32'
 ALL <- TRUE
 
+# HETEROGENEITY
+SIM <- 'hetero-2016-4-6-16-7'
+SIM <- 'hetero-2016-4-6-16-22'
+SIM <- 'hetero-2016-4-6-16-28'
+SIM <- 'hetero-high-ex-2016-4-6-16-32'
+SIM <- 'hetero-high-ex-2016-4-6-16-38'
+SIM <- 'hetero-high-ex-2016-4-6-16-40'
+SIM <- 'hetero-high-ex-2016-4-6-16-43'
+SIM <- 'hetero-high-ex-2016-4-6-16-47'
+SIM <- 'hetero-high-ex-2016-4-6-16-50'
+SIM <- 'hetero-high-ex-2016-4-6-16-51'
+
+# CUSTOM TIME INIT
+SIM <- 'custom-time-init-2016-10-27-18-31'
+
 FITS.NOW <- TRUE
+ALL <- FALSE
 
 if (FITS.NOW) {
   ############## LOAD FITS ################
@@ -118,7 +134,7 @@ if (FITS.NOW) {
   # simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
   #
   ############# COMPUTE FIT ######################
-  mydata <- simul[simul$increase.shock == 1,]
+  mydata <- simul[simul$increase.shock == 1,] # check this.
   fits <- computeFit(mydata)
   for (s in unique(simul$increase.shock)) {
     if (s != 1) {
@@ -129,7 +145,6 @@ if (FITS.NOW) {
   }
 }
 
-
 # PLOTS variables.
 
 if ("init" %in% colnames(fits)) {
@@ -137,13 +152,13 @@ if ("init" %in% colnames(fits)) {
 } else {
   init = 'NA'
 }
-  
+#
 paramsInTitle <- paste0('S1=', fits[1,]$S1, ' e=', fits[1,]$epsilon,
                         ' phi=', fits[1,]$phi, ' rho1=', fits[1,]$rho1,
                         '\nw+=', fits[1,]$wPlus, ' w-=', fits[1,]$wMinus,
                         ' t+=', fits[1,]$increase.shock, ' t-=', fits[1,]$decrease.shock,
                         ' i=', fits[1,]$interval, ' I=', init)
-
+#
 paramsInFilename <- paste0('S1=', fits[1,]$S1, '_e=', fits[1,]$epsilon,
                            '_phi=', fits[1,]$phi, '_rho1=', fits[1,]$rho1,
                            '_w+=', fits[1,]$wPlus, '_w-=', fits[1,]$wMinus,
@@ -206,17 +221,27 @@ if (FITS.NOW) {
 
 #####################
 
+SIM <- 'hetero-high-ex-2016-4-6-18-39'
+SIM <- 'hetero-high-ex-2016-4-6-19-24'
+
+SIM <- 'custom-time-init-2016-10-28-16-37-a'
+
+simul <- loadSimul(SIM, ALL=ALL)
+
 # Fit
-fit <- computeFit(simul); fit
+#fit <- computeFit(simul); fit
+
+
+
 
 # Decision Car/Bus (in time)
 ############################
 
 mysummary <- summarySE(simul, "bus", c("payoff.bus", "car.level",
                                       "car.level.num", "round"), na.rm=TRUE)
-
+#
 mysummary$efficiency <- 1 - ((1 - mysummary$car.level.num) - mysummary$bus)
-
+#
 # Payoff distribution by bus payoff and car level.
 p <- ggplot(mysummary, aes(round, bus, color=payoff.bus))
 p <- p + geom_line(data=datasummary.bus, alpha=0.3, size=1.5)
@@ -337,7 +362,6 @@ pdata$decision.lag <- lag(pdata$decision, 1)
 pdata$payoff.lag <- lag(pdata$payoff, 1)
 pdata$departure.time.lag <- lag(pdata$departure.time, 1)
 pdata$got.car.lag <- lag(pdata$got.car, 1)
-
 
 copy <- as.data.frame(pdata)
 copy$round <- as.numeric(copy$round)

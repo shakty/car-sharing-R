@@ -109,13 +109,18 @@ makeStats <- function(data, write = FALSE) {
   colnames(stats.time) <- c("payoff.bus","car.level", "round", "time", "time.ci")
   #
   if (!("decision.switch" %in% colnames(data))) {
-    payoff.bus <- ifelse(as.numeric(data[1,]$payoff.bus) == 1, 50, 70)
-    cnum <- as.numeric(data[1,]$car.level)
-    car.level <- ifelse(cnum == 1, 25, ifelse(cnum == 2, 50, 70))
+    payoff.bus <- as.numeric(as.character(data[1,]$payoff.bus))
+    car.level <- as.numeric(as.character(data[1,]$car.level))
     library(plm)
     #
+    decision1 <- data[1,"decision"]
     pdata <- pdata.frame(data, index=c('player','round'))
-    pdata$decision.lag <- lag(pdata$decision, 1)
+    # Constants are removed, so put them again, if missing.
+    if (!("decision" %in% colnames(pdata))) {
+      pdata$istimeout.decision <- decision1
+    } else {
+      pdata$decision.lag <- lag(pdata$decision, 1)
+    }
     pdata$payoff.lag <- lag(pdata$payoff, 1)
     pdata$departure.time.lag <- lag(pdata$departure.time, 1)
     # Constants are removed, so put them again, if missing.
@@ -288,7 +293,7 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
     filenames <- list.files(DATADIR, pattern="*.csv")
     nFiles <- length(filenames)
     sprintf("Files found: %i", nFiles)
-    for (n in seq(2,(nFiles-1))) {
+    for (n in seq(2, nFiles)) {
       tmp <- read.table(paste0(DATADIR, 'data_', n, '.csv'), sep=",", header=TRUE)
       data <- rbind(data, tmp)
     }
@@ -545,6 +550,7 @@ loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
+
   start.time <- Sys.time()
   fits <- lapply(seq(1,6),
                  function(n) {
@@ -554,6 +560,7 @@ loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/
                    myfit <- computeFit(tmp)
                  })
   #
+  
   fits <- do.call(rbind.data.frame, fits)
   total.time <- Sys.time() - start.time
   print(paste0("LoadFitsSync Execution time: ", total.time))
@@ -633,7 +640,8 @@ data$departure.time.2 <- ifelse(data$decision == "bus", -5, data$departure.time)
 data$bus <- ifelse(data$decision == "bus", 1, 0)
 data$player.short <- substring(data$player, 10, 12)
 data$tried.car.got.it <- as.factor(ifelse(data$decision == "car" & data$got.car == 0, 0, 1))
-data$payoff.adjusted <- ifelse(data$decision == "bus", 50, data$payoff)
+data$payoff.adjusted <- ifelse(data$decision == "bus", 60, data$payoff)
+data$payoff.adjusted2 <- ifelse(data$decision == "car", ifelse(data$tried.car.got.it == 1, 50, 0), 50)
 data$car.level.num <- ifelse(data$car.level == "25", 0.25, ifelse(data$car.level == "50", 0.5, 0.75))
 
 

@@ -66,30 +66,47 @@ p
 # Higher Bus payoff, leads to higher payoffs because reduces
 # information uncertainty, and helps to create sorting. Effect more evident for car = 0.5.
 
-# 2. Payoffs (in time)
+# 2. Payoffs adjusted (in time)
 mysummary <- summarySE(data, "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
 
 # Payoff distribution by bus payoff and car level.
 p <- ggplot(mysummary, aes(round, payoff.adjusted, color=payoff.bus))
-p <- p + geom_point()
+p <- p + geom_point(aes(shape=payoff.bus))
 p <- p + geom_line()
-p <- p + geom_errorbar(aes(ymin=payoff.adjusted - ci, ymax=payoff.adjusted + ci))
+#p <- p + geom_errorbar(aes(ymin=payoff.adjusted - ci, ymax=payoff.adjusted + ci))
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Round') + ylab('Normalized Payoff')
 p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
 p <- p + theme(strip.background = element_blank(),
                strip.text.y = element_blank())
-p <- p + ggtitle('Normalized payoffs by round')
+#p <- p + ggtitle('Normalized payoffs by round')
 p
 
 # Saving file.
-# filepath <- paste0(IMGDIR, 'norm_payoff_by_round_by_condition.jpg')
-# ggsave(filepath)
+filepath <- paste0(IMGDIR, 'norm_payoff_by_round_by_condition.svg')
+ggsave(filepath, height=4, width=8)
 
+# 2. Payoffs adjusted also for car (in time)
+mysummary <- summarySE(data, "payoff.adjusted2", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+
+# Payoff distribution by bus payoff and car level.
+p <- ggplot(mysummary, aes(round, payoff.adjusted2, color=payoff.bus))
+p <- p + geom_point(aes(shape=payoff.bus))
+p <- p + geom_line()
+p <- p + geom_errorbar(aes(ymin=payoff.adjusted2 - ci, ymax=payoff.adjusted2 + ci))
+p <- p + facet_grid(. ~ car.level)
+p <- p + xlab('Round') + ylab('Normalized Payoff')
+p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
+p <- p + theme(strip.background = element_blank(),
+               strip.text.y = element_blank())
+#p <- p + ggtitle('Normalized payoffs by round')
+p
+
+# Saving file.
+# filepath <- paste0(IMGDIR, 'norm_payoff_by_round_by_condition_2.svg')
+# ggsave(filepath, height=4, width=8)
 # Higher Bus payoff, leads to higher payoffs because helps to create sorting.
 # The effect is evident over rounds.
-
-# 3. Payoffs (adjusted)
 
 # Payoff distribution by bus payoff and car level.
 p <- ggplot(data, aes(departure.time, color=payoff.bus, fill=payoff.bus))
@@ -150,7 +167,7 @@ mysummary <- summarySE(data[data$decision == "car",], "departure.time", c("payof
 p <- ggplot(mysummary, aes(round, departure.time, color=payoff.bus))
 p <- p + geom_point()
 p <- p + geom_line()
-p <- p + geom_errorbar(aes(ymin=departure.time - ci, ymax=departure.time + ci))
+#p <- p + geom_errorbar(aes(ymin=departure.time - ci, ymax=departure.time + ci))
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Round') + ylab('Departure times')
 p <- p + scale_color_discrete(name='Payoff Bus')
@@ -160,8 +177,8 @@ p
 
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'time_car_by_condition.jpg')
-ggsave(filepath)
+filepath <- paste0(IMGDIR, 'time_car_by_condition.svg')
+ggsave(filepath, height=4, width=8)
 
 # Round 1, cars only.
 
@@ -241,7 +258,7 @@ p <- ggplot(mysummary, aes(round, bus, color=payoff.bus))
 p <- p + geom_hline(aes(yintercept=(1-car.level.num)))
 p <- p + geom_point()
 p <- p + geom_line()
-p <- p + geom_errorbar(aes(ymin=bus - ci, ymax=bus + ci))
+#p <- p + geom_errorbar(aes(ymin=bus - ci, ymax=bus + ci))
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Round') + ylab('Share of Bus Takers')
 p <- p + scale_color_discrete(name='Payoff Bus')
@@ -250,8 +267,8 @@ p <- p + theme(strip.background = element_blank(),
 p
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'freq_bus_takers_by_round_by_condition.jpg')
-ggsave(filepath)
+filepath <- paste0(IMGDIR, 'freq_bus_takers_by_round_by_condition.svg')
+ggsave(filepath, height=5, width=8)
 
 # 6. Decision times
 
@@ -386,7 +403,7 @@ mysummary <- summarySE(data, "decision.switch", c("payoff.bus", "car.level", "ro
 p <- ggplot(mysummary, aes(round, decision.switch, group=payoff.bus, color=payoff.bus))
 p <- p + geom_point()
 p <- p + geom_line()
-p <- p + geom_errorbar(aes(ymin=decision.switch - ci, ymax=decision.switch + ci))
+#p <- p + geom_errorbar(aes(ymin=decision.switch - ci, ymax=decision.switch + ci))
 p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Round') + ylab('Avg. Switching')
 p <- p + scale_color_discrete(name='Condition\nPayoff Bus')
@@ -396,8 +413,8 @@ p <- p + ggtitle('Strategy Switching by round')
 p
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'strategy_switching_by_round_by_condition.jpg')
-ggsave(filepath)
+filepath <- paste0(IMGDIR, 'strategy_switching_by_round_by_condition.svg')
+ggsave(filepath, height=5, width=8)
 
 
 
