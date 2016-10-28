@@ -1,127 +1,30 @@
-source("init.R") # /home/stefano/kaycar/R/
-
-# Statistics about the experiment.
-stats <- makeStats(data)
-
-datasummary.bus <- summarySE(data, "bus", c("payoff.bus", "car.level",
-                                             "car.level.num", "round"), na.rm=TRUE)
-
-datasummary.deptime <- summarySE(data[data$decision == "car",], "departure.time", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
-
-
-datasummary.payoff.adj <- summarySE(data, "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
-datasummary.payoff.adj$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
-
-
-datasummary.payoff.adj.car <- summarySE(data[data$decision == "car",], "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
-datasummary.payoff.adj.car$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
-
-datasummary.switch <- summarySE(data, "decision.switch", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+source("init2.R") # /home/stefano/kaycar/R/
 
 ### LOAD DATA
 
-# OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
-# RDIR <- paste0(OVERDIR, 'R/')
-
-SIM <- 'b50_c75_rl-2016-3-15-17-29'
-SIM <- 'b50_c75_rl-2016-3-15-21-9'
-SIM <- 'b50_c75_rl-2016-3-15-21-12'
-SIM <- 'b50_c75_rl-2016-3-15-21-16'
-SIM <- 'b50_c75_rl-2016-3-15-21-21'
-
-SIM <- 'b50_c75_rl-2016-3-15-21-34'
-SIM <- 'b50_c75_rl-2016-3-15-21-39'
-
-SIM <- 'sweep-2016-3-15-22-18'
-
-SIM <- 'sweep-2016-3-16-23-34'
-
-SIM <- 'sweep-2016-3-16-23-41'
-
-SIM <- 'newsweep-2016-3-17-16-15'
-
-SIM <- 'newsweep-2016-3-17-16-22'
-
-SIM <- 'newsweep2-2016-3-17-17-48'
-
-SIM <- 'newsweep2-2016-3-17-17-54'
-
-SIM <- 'newsweep2-2016-3-17-18-2'
-
-# with init
-SIM <- 'newsweep3-2016-3-22-21-59'
-
-# without init
-SIM <- 'newsweep3-2016-3-22-22-29'
-
-# without init, lower weights (0.3,0.4)
-SIM <- 'newsweep3-2016-3-22-22-37'
-
-# without init, higher weights (0.8,0.9)
-SIM <- 'newsweep3-2016-3-22-22-43'
-
-# without init, asymmetric weights (0.8,0.2)
-SIM <- 'newsweep3-2016-3-22-22-48'
-
-# without init, asymmetric weights, inverted (0.2,0.8)
-SIM <- 'newsweep3-2016-3-22-22-55'
-
-
-# without init, asymmetric weights, inverted (0.2,0.8)
-# Rho1 = bus - 10 (was = bus before)
-SIM <- 'newsweep3-2016-3-22-23-1'
-
-
-# without init, asymmetric weights, inverted (0.2,0.8)
-# Rho1 = bus + 10
-SIM <- 'newsweep3-2016-3-22-23-5'
-
-# small exploration (faster learning!)
-SIM <- 'newsweep3-2016-3-23-15-33'
-
-# small exploration (faster learning!), huge rho1 = +100
-SIM <- 'newsweep3-2016-3-23-15-44'
-
-# Erev Roth 1-PARAM
-SIM <- 'simple-2016-3-23-15-58'
-
-# good_stuff (no init)
-SIM <- 'adjusted-2016-3-23-17-39'
-
-# good_stuff (init)
-SIM <- 'adjusted-2016-3-23-19-44'
-
-
-# distribution of car dep time should be right.
-SIM <- 'timeright-2016-3-23-22-12'
-
-# SWEEP
-SIM <- 'sweep_increase-2016-3-23-23-13'
-
-# decrease and some increase.
-SIM <- 'sweep_increase-2016-3-24-14-32'
-ALL <- TRUE
-
-# HETEROGENEITY
-SIM <- 'hetero-2016-4-6-16-7'
-SIM <- 'hetero-2016-4-6-16-22'
-SIM <- 'hetero-2016-4-6-16-28'
-SIM <- 'hetero-high-ex-2016-4-6-16-32'
-SIM <- 'hetero-high-ex-2016-4-6-16-38'
-SIM <- 'hetero-high-ex-2016-4-6-16-40'
-SIM <- 'hetero-high-ex-2016-4-6-16-43'
-SIM <- 'hetero-high-ex-2016-4-6-16-47'
-SIM <- 'hetero-high-ex-2016-4-6-16-50'
-SIM <- 'hetero-high-ex-2016-4-6-16-51'
-
-# CUSTOM TIME INIT
 SIM <- 'custom-time-init-2016-10-27-18-31'
 
+# FITS.NOW will compute fit measures immediately.
+# Otherwise the simulations files are loaded and merged. 
 FITS.NOW <- TRUE
+
+# ALL means that there exists a file where all the results are already merged. 
+# Otherwise, R will load every single file and merge them.
 ALL <- FALSE
 
 if (FITS.NOW) {
   ############## LOAD FITS ################
+  # loadFitsSync operations:
+  # 1. Checks if we are in the cluster or not (adjusts paths).
+  # 2. List all files in SIM directory, open them and join them.
+  # 3. Decorate data (i.e., add factors, and other useful variables)
+  # 4. Compute fits as follows.
+  #    A) Calls makeStats on simulated data to get macro statistics per round:
+  #       number of cars, departure time of cars, switching (TODO: check how).
+  #    B) Merges experiment's stats with simulated stats in the same data frame.
+  #    C) Computes differences in average values per round, squares them,
+  #       and multiplies * 100 (MSE).
+  #    D) Returns the subsetted dataset.
   fits <- loadFitsSync(SIM)
   ###############################################
 } else {
@@ -354,6 +257,8 @@ ggsave(filepath)
 # The effect is evident over rounds.
 
 
+
+
 # SWITCHING
 
 library(plm)
@@ -394,30 +299,3 @@ if (!CLUSTER) {
 filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-switch.jpg')
 ggsave(filepath)
 
-
-# ## S1
-# 
-# P = "S1"
-# 
-# PHI = 0
-# EPSILON = 0
-# doPlots(P, PHI, EPSILON)
-# 
-# 
-# PHI = 0.1
-# EPSILON = 0
-# doPlots(P, PHI, EPSILON)
-# 
-# 
-# PHI = 0.01
-# EPSILON = 0
-# doPlots(P, PHI, EPSILON)
-# 
-# PHI = 0
-# EPSILON = 0.4
-# doPlots(P, PHI, EPSILON)
-# 
-# # INCREASE
-# 
-# P = "increase.shock"
-# doPlotsIncrease(P)
