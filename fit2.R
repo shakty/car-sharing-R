@@ -4,15 +4,21 @@ source("init2.R") # /home/stefano/kaycar/R/
 
 SIM <- 'custom-time-init-2016-10-27-18-31'
 
-# FITS.NOW will compute fit measures immediately.
-# Otherwise the simulations files are loaded and merged. 
-FITS.NOW <- TRUE
+# ACTION:
+#
+# FITS.ONLY will compute fit measures immediately.
+#
+# SIMUL.ONLY will load only the simulations.
+#
+# FITS.AND.SIMUL will load the simulations and then compute fits (both objects available)
+
+ACTION <- "FITS.AND.SIMUL"
 
 # ALL means that there exists a file where all the results are already merged. 
 # Otherwise, R will load every single file and merge them.
 ALL <- FALSE
 
-if (FITS.NOW) {
+if (ACTION == "FITS.ONLY") {
   ############## LOAD FITS ################
   # loadFitsSync operations:
   # 1. Checks if we are in the cluster or not (adjusts paths).
@@ -32,111 +38,138 @@ if (FITS.NOW) {
   simul <- loadSimul(SIM, ALL=ALL)
   ###############################################
   #
+  # Use the big memory (in case we have an all.csv file).
   # library(bigmemory)
   # DATADIR <- paste0(OVERDIR, 'matlab/dump/', SIM, '/')
   # simul <- read.big.matrix(paste0(DATADIR, 'all.csv'), sep=",", header=TRUE)
   #
   ############# COMPUTE FIT ######################
-  mydata <- simul[simul$increase.shock == 1,] # check this.
-  fits <- computeFit(mydata)
-  for (s in unique(simul$increase.shock)) {
-    if (s != 1) {
-      mydata <- simul[simul$increase.shock == s,]
-      fit <- computeFit(mydata);
-      fits <- rbind(fits, fit)
-    }
+  if (ACTION == "FITS.AND.SIMUL") {
+    fits <- computeFit(simul)
   }
 }
 
-# PLOTS variables.
+## Loop parameters that have changed.
 
-if ("init" %in% colnames(fits)) {
-  init = fits[1,]$init
+MAINDIR <- 'newdeal'
+IMGDIR <- paste0(IMGDIR, MAINDIR, '/')
+if (!file.exists(IMGDIR)) {
+  dir.create(file.path(IMGDIR))
+}
+
+# Params in sweep.
+param1 = "rho1"
+param2 = "NONE"
+
+
+# File name prefix.
+fileNamePrefix <- paste0(param1)
+if (param2 != "NONE") {
+  IMGDIRSIM <- paste0(fileNamePrefix, '-', param2)
+}
+# Create IMG DIR for the sweep.
+IMGDIRSIM <- paste0(IMGDIR, fileNamePrefix, '/')
+if (!file.exists(IMGDIRSIM)) {
+  dir.create(file.path(IMGDIRSIM))
+}
+
+# In case we need to subset.
+myfits <- fits
+
+# Write params.
+paramNames <- c("S1", "epsilon", "phi", "rho1", "wPlus",
+                "wMinus", "increase.shock", "decrease.shock",
+                "interval", "init", "hetero", "reward.car")
+
+count <- 1
+paramString <- ''
+for (param in paramNames) {
+  if (param == param1 || param == param2) {
+    paramValue <- unique(myfits[, param])
+  } else {
+    paramValue <- myfits[1, param]
+  }
+  if (count != 1) {
+    paramString <- paste0(paramString, '\n')
+  }
+  paramString <- paste0(paramString, param, ' = ', paramValue)
+  count <- count + 1
+  # Create the variable.
+  assign(param, paramValue)
+}
+
+# Write all params combinations to file.
+write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
+
+# Fig.
+# Mean Square Deviation SHARE BUS TAKERS.
+############################################
+p <- ggplot(myfits, aes_string(x = param1, y = "msd.bus", fill="payoff.bus"), color="white")
+p <- p + geom_bar(stat="identity", position="dodge")
+#
+if (param2 != "NONE") {
+  p <- p + facet_grid(reformulate(param2, "car.level"))
 } else {
-  init = 'NA'
+  p <- p + facet_grid(. ~ car.level)
 }
 #
-paramsInTitle <- paste0('S1=', fits[1,]$S1, ' e=', fits[1,]$epsilon,
-                        ' phi=', fits[1,]$phi, ' rho1=', fits[1,]$rho1,
-                        '\nw+=', fits[1,]$wPlus, ' w-=', fits[1,]$wMinus,
-                        ' t+=', fits[1,]$increase.shock, ' t-=', fits[1,]$decrease.shock,
-                        ' i=', fits[1,]$interval, ' I=', init)
-#
-paramsInFilename <- paste0('S1=', fits[1,]$S1, '_e=', fits[1,]$epsilon,
-                           '_phi=', fits[1,]$phi, '_rho1=', fits[1,]$rho1,
-                           '_w+=', fits[1,]$wPlus, '_w-=', fits[1,]$wMinus,
-                           '_t+=', fits[1,]$increase.shock, '_t-=', fits[1,]$decrease.shock,
-                           '_i=', fits[1,]$interval, '_I=', init)
-
-#######################
-
-#
-# fits.melted <- melt(fits, c("S1", "epsilon", "phi",  "rho1",
-#                             "wPlus", "wMinus", "upsilon", "increase.shock", "decrease.shock",
-#                            "interval", "payoff.bus", "car.level"))
-
-p <- ggplot(fits, aes(decrease.shock, msd.bus, fill=payoff.bus), color="white")
-p <- p + geom_bar(stat="identity", position="dodge")
-p <- p + facet_grid(. ~ car.level)
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Bus Takers')
-p <- p + ggtitle(paramsInTitle)
+#p <- p + ggtitle(paramsInTitle)
 if (!CLUSTER) {
   p
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-bus.jpg')
+filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-bus.jpg')
 ggsave(filepath)
 
-
-
-p <- ggplot(fits, aes(decrease.shock, msd.time, fill=payoff.bus), color="white")
+# Fig.
+# Mean Square Deviation DEPARTURE TIME.
+############################################
+p <- ggplot(myfits, aes_string(x = param1, y = 'msd.time', fill='payoff.bus'), color="white")
 p <- p + geom_bar(stat="identity", position="dodge")
-p <- p + facet_grid(. ~ car.level)
+#
+if (param2 != "NONE") {
+  p <- p + facet_grid(reformulate(param2, "car.level"))
+} else {
+  p <- p + facet_grid(. ~ car.level)
+}
+#
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Departure Time Car')
-p <- p + ggtitle(paramsInTitle)
+#p <- p + ggtitle(paramsInTitle)
 if (!CLUSTER) {
   p
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-time.jpg')
+filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-time.jpg')
 ggsave(filepath)
 
-p <- ggplot(fits, aes(decrease.shock, msd.switch, fill=payoff.bus), color="white")
+# Fig.
+# Mean Square Deviation STRATEGY SWITCHES.
+############################################
+p <- ggplot(myfits, aes_string(x = parm1, 'msd.switch', fill='payoff.bus'), color="white")
 p <- p + geom_bar(stat="identity", position="dodge")
-p <- p + facet_grid(. ~ car.level)
+#
+if (param2 != "NONE") {
+  p <- p + facet_grid(reformulate(param2, "car.level"))
+} else {
+  p <- p + facet_grid(. ~ car.level)
+}
 p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Switches')
-p <- p + ggtitle(paramsInTitle)
+#p <- p + ggtitle(paramsInTitle)
 if (!CLUSTER) {
   p
 }
 
 # Saving file.
-filepath <- paste0(IMGDIR, 'sweeps/', paramsInFilename, '__msd-switch.jpg')
+filepath <- paste0(IMGDIRSIM, fileNamePrefix,'__msd-switch.jpg')
 ggsave(filepath)
 
-
-if (FITS.NOW) {
-  print('FITS.NOW: not doing more plots...')
+if (FITS.ONLY) {
+  print('FITS.ONLY: not doing more plots...')
   q()
 }
-
-#####################
-
-SIM <- 'hetero-high-ex-2016-4-6-18-39'
-SIM <- 'hetero-high-ex-2016-4-6-19-24'
-
-SIM <- 'custom-time-init-2016-10-28-16-37-a'
-
-SIM <- 'new-deal-2016-10-28-23-57'
-
-simul <- loadSimul(SIM, ALL=ALL)
-
-# Fit
-#fit <- computeFit(simul); fit
-
-
 
 
 # Decision Car/Bus (in time)
@@ -299,3 +332,7 @@ if (!CLUSTER) {
 filepath <- paste0(IMGDIR, 'rl/', paramsInFilename, '__rl-switch.jpg')
 ggsave(filepath)
 
+
+  
+  
+}
