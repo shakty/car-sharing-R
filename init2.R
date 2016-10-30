@@ -290,7 +290,7 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
   #
   if (!ALL) {
     data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="*.csv")
+    filenames <- list.files(DATADIR, pattern="data_*.csv")
     nFiles <- length(filenames)
     sprintf("Files found: %i", nFiles)
     for (n in seq(2, nFiles)) {
@@ -353,7 +353,7 @@ loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypape
   #
   if (!ALL) {
     data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="*.csv")
+    filenames <- list.files(DATADIR, pattern="data_*.csv")
     nFiles <- length(filenames)
     print(paste0("Files found: ", nFiles))
     #
@@ -419,7 +419,7 @@ loadFitsOld <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypaper
   #
   if (!ALL) {
     # data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="*.csv")
+    filenames <- list.files(DATADIR, pattern="data_*.csv")
     nFiles <- length(filenames)
     print(paste0("Files found: ", nFiles))
     #
@@ -508,7 +508,7 @@ loadFits <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matl
   clusterExport(cl, "ddply")
   clusterExport(cl, "decorateData")
   clusterExport(cl, "rename")
-  filenames <- list.files(DATADIR, pattern="*.csv")
+  filenames <- list.files(DATADIR, pattern="data_*.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -530,6 +530,31 @@ loadFits <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matl
   return(fits)  
 }
 
+joinMseFiles <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
+  #
+  if (!file.exists(OVERDIR)) {
+    # We are on the cluster.
+    OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model'
+  }
+  DATADIR <- paste0(OVERDIR, '/dump/', SIM, '/')
+  #
+  mydata <- data.frame()
+  files <- list.files(pattern = "mse_*", path = DATADIR)
+  for (f in files) {
+    tmp <- read.table(paste0(DATADIR, f), sep=",", header = TRUE)
+    if (nrow(mydata) == 0) {
+      mydata <- tmp
+    } else {
+      mydata <- rbind(mydata, tmp)
+    }
+    # print(f)
+  }
+  mydata$car.level <- as.factor(mydata$car.level)
+  mydata$payoff.bus <- as.factor(mydata$payoff.bus)
+  return(mydata)
+}
+                         
+
 loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matlab') {
   #
   if (!file.exists(OVERDIR)) {
@@ -546,7 +571,7 @@ loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/
     dir.create(file.path(IMGDIR))
   }
   #
-  filenames <- list.files(DATADIR, pattern="*.csv")
+  filenames <- list.files(DATADIR, pattern="data_*.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -585,7 +610,7 @@ loadFitsForLoop <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_c
     dir.create(file.path(IMGDIR))
   }
   #
-  filenames <- list.files(DATADIR, pattern="*.csv")
+  filenames <- list.files(DATADIR, pattern="data_*.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -755,6 +780,7 @@ datasummary.bus <- summarySE(data, "bus", c("payoff.bus", "car.level",
 datasummary.deptime <- summarySE(data[data$decision == "car",], "departure.time", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
 
 
+
 datasummary.payoff.adj <- summarySE(data, "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
 datasummary.payoff.adj$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
 
@@ -763,3 +789,91 @@ datasummary.payoff.adj.car <- summarySE(data[data$decision == "car",], "payoff.a
 datasummary.payoff.adj.car$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
 
 datasummary.switch <- summarySE(data, "decision.switch", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+
+
+if (WRITE.SUMMARIES) {
+
+  # BUS PAYOFF = 50.
+  
+  # BUS.
+  ms50 <- datasummary.bus[datasummary.bus$payoff.bus == 50,]
+  ms50$car.level.num <- NULL
+  ms5025 <- ms50[ms50$car.level == 25,]
+  write.table(ms5025, file=paste0(DATADIR, 'summary_bus_round_50_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5050 <- ms50[ms50$car.level == 50,]
+  write.table(ms5050, file=paste0(DATADIR, 'summary_bus_round_50_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5075 <- ms50[ms50$car.level == 75,]
+  write.table(ms5075, file=paste0(DATADIR, 'summary_bus_round_50_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # DEPARTURE TIME.
+  ms50 <- datasummary.deptime[datasummary.deptime$payoff.bus == 50,]
+  ms5025 <- ms50[ms50$car.level == 25,]
+  write.table(ms5025, file=paste0(DATADIR, 'summary_deptime_round_50_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5050 <- ms50[ms50$car.level == 50,]
+  write.table(ms5050, file=paste0(DATADIR, 'summary_deptime_round_50_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5075 <- ms50[ms50$car.level == 75,]
+  write.table(ms5075, file=paste0(DATADIR, 'summary_deptime_round_50_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # SWITCHES.
+  ms50 <- datasummary.switch[datasummary.switch$payoff.bus == 50,]
+  ms5025 <- ms50[ms50$car.level == 25,]
+  write.table(ms5025, file=paste0(DATADIR, 'summary_switch_round_50_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5050 <- ms50[ms50$car.level == 50,]
+  write.table(ms5050, file=paste0(DATADIR, 'summary_switch_round_50_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5075 <- ms50[ms50$car.level == 75,]
+  write.table(ms5075, file=paste0(DATADIR, 'summary_switch_round_50_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+
+  # BUS PAYOFF = 70.
+  
+  # BUS.
+  ms70 <- datasummary.bus[datasummary.bus$payoff.bus == 70,]
+  ms70$car.level.num <- NULL
+  ms7025 <- ms70[ms70$car.level == 25,]
+  write.table(ms7025, file=paste0(DATADIR, 'summary_bus_round_70_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7050 <- ms70[ms70$car.level == 50,]
+  write.table(ms7050, file=paste0(DATADIR, 'summary_bus_round_70_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7075 <- ms70[ms70$car.level == 75,]
+  write.table(ms7075, file=paste0(DATADIR, 'summary_bus_round_70_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # DEPARTURE TIME.
+  ms70 <- datasummary.deptime[datasummary.deptime$payoff.bus == 70,]
+  ms7025 <- ms70[ms70$car.level == 25,]
+  write.table(ms7025, file=paste0(DATADIR, 'summary_deptime_round_70_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7050 <- ms70[ms70$car.level == 50,]
+  write.table(ms7050, file=paste0(DATADIR, 'summary_deptime_round_70_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7075 <- ms70[ms70$car.level == 75,]
+  write.table(ms7075, file=paste0(DATADIR, 'summary_deptime_round_70_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # SWITCHES.
+  ms70 <- datasummary.switch[datasummary.switch$payoff.bus == 70,]
+  ms7025 <- ms70[ms70$car.level == 25,]
+  write.table(ms7025, file=paste0(DATADIR, 'summary_switch_round_70_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7050 <- ms70[ms70$car.level == 50,]
+  write.table(ms7050, file=paste0(DATADIR, 'summary_switch_round_70_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7075 <- ms70[ms70$car.level == 75,]
+  write.table(ms7075, file=paste0(DATADIR, 'summary_switch_round_70_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+
+  
+
+  
+}
