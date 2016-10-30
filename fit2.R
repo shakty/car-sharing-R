@@ -68,14 +68,19 @@ countChanged <- 1
 paramString <- ''
 for (param in paramNames) {
   #
-  paramValue <- unique(myfits[, param])
-  if (length(paramValue > 1)) {
+  if (param %in% colnames(myfits)) {
+    paramValue <- unique(myfits[, param])
+  } else {
+    paramValue <- 'NA'
+  }
+  #
+  if (length(paramValue) > 1) {
     assign(paste0('param', countChanged), param)
     countChanged <- countChanged + 1
-  } else if (length(paramValue != 1)) {
+  } else if (length(paramValue) != 1) {
     print(paste0('FIT2: param not found: ', param))
     q()
-  }
+  }  
   #
   if (count != 1) {
     paramString <- paste0(paramString, '\n')
@@ -86,7 +91,7 @@ for (param in paramNames) {
   assign(param, paramValue)
 }
 
-if (countChanged == 1) {
+if (countChanged == 2) {
   param2 <- 'NONE'
 } else if (countChanged > 2) {
   print(paste0('FIT2: more than two params changed: ', countChanged))
@@ -95,7 +100,6 @@ if (countChanged == 1) {
   print(paste0('FIT2: no param changed: ', countChanged))
   q()
 }
-
 
 # Write all params combinations to file.
 write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
