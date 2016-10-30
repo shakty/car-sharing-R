@@ -636,6 +636,24 @@ loadFitsForLoop <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_c
 
 ### LOAD DATA
 
+CLUSTER <- 0
+OVERDIR <- '/home/stefano/Documents/mypapers/kay_car/'
+if (!file.exists(OVERDIR)) {
+  # We are on the cluster.
+  OVERDIR <- '/cluster/home/gess/balistef/matlab/car-sharing-model/'
+  CLUSTER <- 1
+}
+
+RDIR <- paste0(OVERDIR, 'R/')
+DATADIR <- paste0(OVERDIR, 'data/ALL/')
+print(DATADIR)
+setwd(DATADIR)
+IMGDIR <- paste0(DATADIR, "img/")
+# Create IMG dir if not existing
+if (!file.exists(IMGDIR)) {
+  dir.create(file.path(IMGDIR))
+}
+
 WRITE.SUMMARIES <- FALSE
 
 if (WRITE.SUMMARIES) {
