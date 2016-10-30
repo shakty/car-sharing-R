@@ -56,7 +56,7 @@ if (countChanged == 2) {
 } else if (countChanged > 3) {
   print(paste0('FIT2: more than two params changed: ', countChanged))
   q()
-} else if (countChanged == 0) {
+} else if (countChanged < 2) {
   print(paste0('FIT2: no param changed: ', countChanged))
   q()
 }
