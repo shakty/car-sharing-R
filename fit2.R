@@ -49,18 +49,56 @@ if (ACTION == "FITS.ONLY") {
   }
 }
 
-## Loop parameters that have changed.
-
+# Create main directory, if not found.
 MAINDIR <- 'newdeal'
 IMGDIR <- paste0(IMGDIR, MAINDIR, '/')
 if (!file.exists(IMGDIR)) {
   dir.create(file.path(IMGDIR))
 }
 
-# Params in sweep.
-param1 = "rho1"
-param2 = "NONE"
+## Find out which parameters have changed.
 
+# Write params.
+paramNames <- c("S1", "epsilon", "phi", "rho1", "wPlus",
+                "wMinus", "increase.shock", "decrease.shock",
+                "interval", "init", "hetero", "reward.car")
+
+count <- 1
+countChanged <- 1
+paramString <- ''
+for (param in paramNames) {
+  #
+  paramValue <- unique(myfits[, param])
+  if (length(paramValue > 1)) {
+    assign(paste0('param', countChanged), param)
+    countChanged <- countChanged + 1
+  } else if (length(paramValue != 1)) {
+    print(paste0('FIT2: param not found: ', param))
+    q()
+  }
+  #
+  if (count != 1) {
+    paramString <- paste0(paramString, '\n')
+  }
+  paramString <- paste0(paramString, param, ' = ', paramValue)
+  count <- count + 1
+  # Create the variable.
+  assign(param, paramValue)
+}
+
+if (countChanged == 1) {
+  param2 <- 'NONE'
+} else if (countChanged > 2) {
+  print(paste0('FIT2: more than two params changed: ', countChanged))
+  q()
+} else if (countChanged == 0) {
+  print(paste0('FIT2: no param changed: ', countChanged))
+  q()
+}
+
+
+# Write all params combinations to file.
+write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
 
 # File name prefix.
 fileNamePrefix <- paste0(param1)
@@ -76,30 +114,6 @@ if (!file.exists(IMGDIRSIM)) {
 # In case we need to subset.
 myfits <- fits
 
-# Write params.
-paramNames <- c("S1", "epsilon", "phi", "rho1", "wPlus",
-                "wMinus", "increase.shock", "decrease.shock",
-                "interval", "init", "hetero", "reward.car")
-
-count <- 1
-paramString <- ''
-for (param in paramNames) {
-  if (param == param1 || param == param2) {
-    paramValue <- unique(myfits[, param])
-  } else {
-    paramValue <- myfits[1, param]
-  }
-  if (count != 1) {
-    paramString <- paste0(paramString, '\n')
-  }
-  paramString <- paste0(paramString, param, ' = ', paramValue)
-  count <- count + 1
-  # Create the variable.
-  assign(param, paramValue)
-}
-
-# Write all params combinations to file.
-write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
 
 # Fig.
 # Mean Square Deviation SHARE BUS TAKERS.
@@ -148,7 +162,7 @@ ggsave(filepath)
 # Fig.
 # Mean Square Deviation STRATEGY SWITCHES.
 ############################################
-p <- ggplot(myfits, aes_string(x = parm1, 'msd.switch', fill='payoff.bus'), color="white")
+p <- ggplot(myfits, aes_string(x = param1, 'msd.switch', fill='payoff.bus'), color="white")
 p <- p + geom_bar(stat="identity", position="dodge")
 #
 if (param2 != "NONE") {
