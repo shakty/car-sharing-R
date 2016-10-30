@@ -56,6 +56,9 @@ if (!file.exists(IMGDIR)) {
   dir.create(file.path(IMGDIR))
 }
 
+# In case we need to subset.
+myfits <- fits
+
 ## Find out which parameters have changed.
 
 # Write params.
@@ -114,9 +117,6 @@ IMGDIRSIM <- paste0(IMGDIR, fileNamePrefix, '/')
 if (!file.exists(IMGDIRSIM)) {
   dir.create(file.path(IMGDIRSIM))
 }
-
-# In case we need to subset.
-myfits <- fits
 
 
 # Fig.
