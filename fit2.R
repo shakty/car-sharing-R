@@ -96,7 +96,7 @@ for (param in paramNames) {
 
 if (countChanged == 2) {
   param2 <- 'NONE'
-} else if (countChanged > 2) {
+} else if (countChanged > 3) {
   print(paste0('FIT2: more than two params changed: ', countChanged))
   q()
 } else if (countChanged == 0) {
