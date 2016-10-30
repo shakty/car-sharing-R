@@ -104,9 +104,6 @@ if (countChanged == 2) {
   q()
 }
 
-# Write all params combinations to file.
-write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
-
 # File name prefix.
 fileNamePrefix <- paste0(param1)
 if (param2 != "NONE") {
@@ -118,6 +115,8 @@ if (!file.exists(IMGDIRSIM)) {
   dir.create(file.path(IMGDIRSIM))
 }
 
+# Write all params combinations to file.
+write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
 
 # Fig.
 # Mean Square Deviation SHARE BUS TAKERS.
