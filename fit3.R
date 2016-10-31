@@ -2,7 +2,8 @@ source("init3.R") # /home/stefano/kaycar/R/
 
 ### LOAD DATA
 
-SIM <- 'new-deal-2016-10-30-15-49'
+# SIM <- 'new-deal-2016-10-30-15-49'
+source(paste0(OVERDIR, 'simName.R'))
 
 fits <- joinMseFiles(SIM)
 
@@ -47,6 +48,7 @@ for (param in paramNames) {
   }
   paramString <- paste0(paramString, param, ' = ', paramValue)
   count <- count + 1
+  print(paramValue)
   # Create the variable.
   assign(param, paramValue)
 }
@@ -122,7 +124,7 @@ ggsave(filepath)
 # Fig.
 # Mean Square Deviation STRATEGY SWITCHES.
 ############################################
-p <- ggplot(myfits, aes_string(x = param1, 'msd.switch', fill='payoff.bus'), color="white")
+p <- ggplot(myfits, aes_string(x = param1, y = 'msd.switch', fill='payoff.bus'), color="white")
 p <- p + geom_bar(stat="identity", position="dodge")
 #
 if (param2 != "NONE") {
@@ -137,10 +139,10 @@ if (!CLUSTER) {
 }
 
 # Saving file.
-filepath <- paste0(IMGDIRSIM, fileNamePrefix,'__msd-switch.jpg')
+filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-switch.jpg')
 ggsave(filepath)
 
-if (FITS.ONLY) {
+if (TRUE) {
   print('FITS.ONLY: not doing more plots...')
   q()
 }
