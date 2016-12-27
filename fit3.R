@@ -9,7 +9,7 @@ source(paste0(OVERDIR, 'simName.R'))
 fits <- joinMseFiles(SIM)
 
 # Create main directory, if not found.
-MAINDIR <- 'newdeal'
+MAINDIR <- 'belief'
 IMGDIR <- paste0(IMGDIR, MAINDIR, '/')
 if (!file.exists(IMGDIR)) {
   dir.create(file.path(IMGDIR))
@@ -71,9 +71,12 @@ if (param2 != "NONE") {
 }
 # Create IMG DIR for the sweep.
 IMGDIRSIM <- paste0(IMGDIR, fileNamePrefix, '/')
-if (!file.exists(IMGDIRSIM)) {
-  dir.create(file.path(IMGDIRSIM))
+counter <- 0
+while (file.exists(IMGDIRSIM)) {
+  counter <- counter + 1
+  IMGDIRSIM <- paste0(IMGDIRSIM, counter)
 }
+dir.create(file.path(IMGDIRSIM))
 
 # Write all params combinations to file.
 write(paramString, file=paste0(IMGDIRSIM, 'params.txt'))
