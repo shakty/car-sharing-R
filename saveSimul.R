@@ -143,49 +143,7 @@ if (!CLUSTER) {
 filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-switch.jpg')
 ggsave(filepath)
 
-
-## Create summary files
-
-
 if (TRUE) {
-
-  
-  mysummary <- summarySE(fits[fits$decision == "car",],
-                         "departure.time", c("payoff.bus", "car.level", "round", "epsilon"), na.rm=TRUE)
-
-  write.csv(mysummary, './summary_deptime.csv')
-
-  
-  mysummary <- summarySE(fits, "bus", c("payoff.bus", "car.level",
-                                         "car.level.num", "round", "epsilon"), na.rm=TRUE)
-
-  write.csv(mysummary, './summary_busshare.csv')
-
-
-  mysummary <- summarySE(fits, "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
-  mysummary$payoff.bus.num <- ifelse(mysummary$payoff.bus == "70", 70, 50)
-
-  write.csv(mysummary, './summary_payoffs.csv')
-
-
-  library(plm)
-
-  # Switching
-  pdata <- pdata.frame(fits, index=c('player', 'round'))
-  pdata$decision.lag <- lag(pdata$decision, 1)
-  pdata$payoff.lag <- lag(pdata$payoff, 1)
-  pdata$departure.time.lag <- lag(pdata$departure.time, 1)
-  pdata$got.car.lag <- lag(pdata$got.car, 1)
-  
-  copy <- as.data.frame(pdata)
-  copy$round <- as.numeric(copy$round)
-  
-  copy$decision.switch <- ifelse(copy$decision != copy$decision.lag, 1, 0)
-  
-  mysummary <- summarySE(copy, "decision.switch",
-                         c("payoff.bus", "car.level", "round", "epsilon"), na.rm=TRUE)
-
-  
   print('FITS.ONLY: not doing more plots...')
   q()
 }
@@ -197,20 +155,20 @@ if (TRUE) {
 # Decision Car/Bus (in time)
 ############################
 
-mysummary <- summarySE(simul, "bus", c("payoff.bus", "car.level",
-                                      "car.level.num", "round"), na.rm=TRUE)
+mysummary <- read.csv('./summary_bushare.csv')
+mysummary$payoff.bus <- as.factor(mysummary$payoff.bus)
+mysummary$car.level <- as.factor(mysummary$car.level)
 
-#
-mysummary$efficiency <- 1 - ((1 - mysummary$car.level.num) - mysummary$bus)
-#
+
 # Payoff distribution by bus payoff and car level.
+# [mysummary$epsilon == 0.05,]
 p <- ggplot(mysummary, aes(round, bus, color=payoff.bus))
 p <- p + geom_line(data=datasummary.bus, alpha=0.3, size=1.5)
 p <- p + geom_hline(aes(yintercept=(1-car.level.num)))
 p <- p + geom_point()
 p <- p + geom_line()
 #p <- p + geom_errorbar(aes(ymin=bus - ci, ymax=bus + ci))
-p <- p + facet_grid(. ~ car.level)
+p <- p + facet_wrap(epsilon ~ car.level)
 p <- p + xlab('Round') + ylab('Share of Bus Takers')
 p <- p + scale_color_discrete(name='Payoff Bus')
 p <- p + theme(strip.background = element_blank(),
@@ -230,10 +188,12 @@ ggsave(filepath)
 #####################
 
 
-mysummary <- summarySE(simul[simul$decision == "car",], "departure.time", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+mysummary <- read.csv('./summary_deptime.csv')
+mysummary$payoff.bus <- as.factor(mysummary$payoff.bus)
+mysummary$car.level <- as.factor(mysummary$car.level)
 
 # Payoff distribution by bus payoff and car level.
-p <- ggplot(mysummary, aes(round, departure.time, color=payoff.bus))
+p <- ggplot(mysummary[mysummary$epsilon == 0.1,], aes(round, departure.time, color=payoff.bus))
 p <- p + geom_line(data=datasummary.deptime, alpha=0.3, size=1.5)
 p <- p + geom_point()
 p <- p + geom_line()
