@@ -290,7 +290,7 @@ loadSimul <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypapers/
   #
   if (!ALL) {
     data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="data_*.csv")
+    filenames <- list.files(DATADIR, pattern="[data_]?.csv")
     nFiles <- length(filenames)
     sprintf("Files found: %i", nFiles)
     for (n in seq(2, nFiles)) {
@@ -353,7 +353,7 @@ loadSimulPar <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypape
   #
   if (!ALL) {
     data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="data_*.csv")
+    filenames <- list.files(DATADIR, pattern="[data_]?.csv")
     nFiles <- length(filenames)
     print(paste0("Files found: ", nFiles))
     #
@@ -419,7 +419,7 @@ loadFitsOld <- function(SIM, ALL=FALSE, OVERDIR='/home/stefano/Documents/mypaper
   #
   if (!ALL) {
     # data <- read.table(paste0(DATADIR, 'data_1.csv'), sep=",", header=TRUE)
-    filenames <- list.files(DATADIR, pattern="data_*.csv")
+    filenames <- list.files(DATADIR, pattern="[data_]?.csv")
     nFiles <- length(filenames)
     print(paste0("Files found: ", nFiles))
     #
@@ -508,7 +508,7 @@ loadFits <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/matl
   clusterExport(cl, "ddply")
   clusterExport(cl, "decorateData")
   clusterExport(cl, "rename")
-  filenames <- list.files(DATADIR, pattern="data_*.csv")
+  filenames <- list.files(DATADIR, pattern="[data_]?.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -571,7 +571,7 @@ loadFitsSync <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_car/
     dir.create(file.path(IMGDIR))
   }
   #
-  filenames <- list.files(DATADIR, pattern="data_*.csv")
+  filenames <- list.files(DATADIR, pattern="[data_]?.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -610,7 +610,7 @@ loadFitsForLoop <- function(SIM, OVERDIR='/home/stefano/Documents/mypapers/kay_c
     dir.create(file.path(IMGDIR))
   }
   #
-  filenames <- list.files(DATADIR, pattern="data_*.csv")
+  filenames <- list.files(DATADIR, pattern="[data_]?.csv")
   nFiles <- length(filenames)
   print(paste0("Files found: ", nFiles))
   #
@@ -736,9 +736,5 @@ if (WRITE.SUMMARIES) {
   ms7075 <- ms70[ms70$car.level == 75,]
   write.table(ms7075, file=paste0(DATADIR, 'summary_switch_round_70_75.csv'),
             row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
-
-
-  
-
   
 }

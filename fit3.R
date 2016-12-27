@@ -3,6 +3,7 @@ source("init3.R") # /home/stefano/kaycar/R/
 ### LOAD DATA
 
 # SIM <- 'new-deal-2016-10-30-15-49'
+# To be executed on cluster.
 source(paste0(OVERDIR, 'simName.R'))
 
 fits <- joinMseFiles(SIM)
