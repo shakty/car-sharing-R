@@ -70,12 +70,13 @@ if (param2 != "NONE") {
   fileNamePrefix <- paste0(fileNamePrefix, '-', param2)
 }
 # Create IMG DIR for the sweep.
-IMGDIRSIM <- paste0(IMGDIR, fileNamePrefix, '/')
+IMGDIRSIM <- paste0(IMGDIR, fileNamePrefix)
 counter <- 0
 while (file.exists(IMGDIRSIM)) {
   counter <- counter + 1
   IMGDIRSIM <- paste0(IMGDIRSIM, counter)
 }
+IMGDIRSIM <- paste0(IMGDIRSIM, '/')
 dir.create(file.path(IMGDIRSIM))
 
 # Write all params combinations to file.
