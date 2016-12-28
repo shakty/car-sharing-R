@@ -658,6 +658,29 @@ WRITE.SUMMARIES <- FALSE
 
 if (WRITE.SUMMARIES) {
 
+  datasummary.bus <- summarySE(data, "bus",
+                               c("payoff.bus", "car.level",
+                                 "car.level.num", "round"), na.rm=TRUE)
+
+  
+  datasummary.deptime <- summarySE(data[data$decision == "car",], "departure.time",
+                                   c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+
+
+
+  datasummary.payoff.adj <- summarySE(data, "payoff.adjusted",
+                                      c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+  datasummary.payoff.adj$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
+
+
+  datasummary.payoff.adj.car <- summarySE(data[data$decision == "car",],
+                                          "payoff.adjusted", c("payoff.bus", "car.level", "round"),
+                                          na.rm=TRUE)
+  datasummary.payoff.adj.car$payoff.bus.num <- ifelse(datasummary.payoff.adj$payoff.bus == "70", 70, 50)
+
+  
+  datasummary.switch <- summarySE(data, "decision.switch", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+
   # BUS PAYOFF = 50.
   
   # BUS.
@@ -697,7 +720,31 @@ if (WRITE.SUMMARIES) {
   write.table(ms5075, file=paste0(DATADIR, 'summary_switch_round_50_75.csv'),
             row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
 
+  # PAYOFF ADJ.
+  ms50 <- datasummary.payoff.adj[datasummary.payoff.adj$payoff.bus == 50,]
+  ms5025 <- ms50[ms50$car.level == 25,]
+  write.table(ms5025, file=paste0(DATADIR, 'summary_payoff-adj_round_50_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5050 <- ms50[ms50$car.level == 50,]
+  write.table(ms5050, file=paste0(DATADIR, 'summary_payoff-adj_round_50_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5075 <- ms50[ms50$car.level == 75,]
+  write.table(ms5075, file=paste0(DATADIR, 'summary_payoff-adj_round_50_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
 
+  # PAYOFF ADJ. CAR.
+  ms50 <- datasummary.payoff.adj.car[datasummary.payoff.adj.car$payoff.bus == 50,]
+  ms5025 <- ms50[ms50$car.level == 25,]
+  write.table(ms5025, file=paste0(DATADIR, 'summary_payoff-adj-car_round_50_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5050 <- ms50[ms50$car.level == 50,]
+  write.table(ms5050, file=paste0(DATADIR, 'summary_payoff-adj-car_round_50_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms5075 <- ms50[ms50$car.level == 75,]
+  write.table(ms5075, file=paste0(DATADIR, 'summary_payoff-adj-car_round_50_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  
   # BUS PAYOFF = 70.
   
   # BUS.
@@ -735,6 +782,30 @@ if (WRITE.SUMMARIES) {
             row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
   ms7075 <- ms70[ms70$car.level == 75,]
   write.table(ms7075, file=paste0(DATADIR, 'summary_switch_round_70_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # PAYOFF ADJ.
+  ms70 <- datasummary.payoff.adj[datasummary.payoff.adj$payoff.bus == 70,]
+  ms7025 <- ms70[ms70$car.level == 25,]
+  write.table(ms7025, file=paste0(DATADIR, 'summary_payoff-adj_round_70_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7050 <- ms70[ms70$car.level == 50,]
+  write.table(ms7050, file=paste0(DATADIR, 'summary_payoff-adj_round_70_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7075 <- ms70[ms70$car.level == 75,]
+  write.table(ms7075, file=paste0(DATADIR, 'summary_payoff-adj_round_70_75.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+
+  # PAYOFF ADJ. CAR.
+  ms70 <- datasummary.payoff.adj.car[datasummary.payoff.adj.car$payoff.bus == 70,]
+  ms7025 <- ms70[ms70$car.level == 25,]
+  write.table(ms7025, file=paste0(DATADIR, 'summary_payoff-adj-car_round_70_25.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7050 <- ms70[ms70$car.level == 50,]
+  write.table(ms7050, file=paste0(DATADIR, 'summary_payoff-adj-car_round_70_50.csv'),
+            row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
+  ms7075 <- ms70[ms70$car.level == 75,]
+  write.table(ms7075, file=paste0(DATADIR, 'summary_payoff-adj-car_round_70_75.csv'),
             row.names=FALSE, quote=FALSE, col.names=FALSE, sep=",")
   
 }
