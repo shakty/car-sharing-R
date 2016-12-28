@@ -793,6 +793,19 @@ datasummary.switch <- summarySE(data, "decision.switch", c("payoff.bus", "car.le
 
 if (WRITE.SUMMARIES) {
 
+  # By measure.
+
+  write.csv(datasummary.bus, file=paste0(DATADIR, 'summary_bus_all.csv'),
+            row.names=FALSE)
+  write.csv(datasummary.deptime, file=paste0(DATADIR, 'summary_deptime_all.csv'),
+            row.names=FALSE)
+  write.csv(datasummary.payoff.adj, file=paste0(DATADIR, 'summary_payoff-adj_all.csv'),
+            row.names=FALSE)
+  write.csv(datasummary.payoff.adj.car, file=paste0(DATADIR, 'summary_payoff-adj-car_all.csv'),
+            row.names=FALSE)
+  write.csv(datasummary.switch, file=paste0(DATADIR, 'summary_switch_all.csv'),
+            row.names=FALSE)
+  
   # BUS PAYOFF = 50.
   
   # BUS.
