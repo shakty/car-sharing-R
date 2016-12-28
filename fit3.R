@@ -93,7 +93,7 @@ if (param2 != "NONE") {
   p <- p + facet_grid(. ~ car.level)
 }
 #
-p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Bus Takers')
+p <- p + xlab('epsilon') + ylab('Mean Squared Error Bus Takers')
 p <- p + ggtitle(fileNamePrefix)
 if (!CLUSTER) {
   p
@@ -115,7 +115,7 @@ if (param2 != "NONE") {
   p <- p + facet_grid(. ~ car.level)
 }
 #
-p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Departure Time Car')
+p <- p + xlab('epsilon') + ylab('Mean Squared Error Departure Time Car')
 p <- p + ggtitle(fileNamePrefix)
 if (!CLUSTER) {
   p
@@ -136,7 +136,7 @@ if (param2 != "NONE") {
 } else {
   p <- p + facet_grid(. ~ car.level)
 }
-p <- p + xlab('Increase time after getting car') + ylab('Mean Squared Error Switches')
+p <- p + xlab('epsilon') + ylab('Mean Squared Error Switches')
 p <- p + ggtitle(fileNamePrefix)
 if (!CLUSTER) {
   p
@@ -146,6 +146,49 @@ if (!CLUSTER) {
 filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-switch.jpg')
 ggsave(filepath)
 
+# Fig.
+# Mean Square Deviation PAYOFF ADJ.
+############################################
+p <- ggplot(myfits, aes_string(x = param1, y = 'msd.payoff.adjusted', fill='payoff.bus'), color="white")
+p <- p + geom_bar(stat="identity", position="dodge")
+#
+if (param2 != "NONE") {
+  p <- p + facet_grid(reformulate(param2, "car.level"))
+} else {
+  p <- p + facet_grid(. ~ car.level)
+}
+#
+p <- p + xlab('epsilon') + ylab('Mean Squared Error Payoff Adjusted(50)')
+p <- p + ggtitle(fileNamePrefix)
+if (!CLUSTER) {
+  p
+}
+
+# Saving file.
+filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-payoff-adj.jpg')
+ggsave(filepath)
+
+# Fig.
+# Mean Square Deviation PAYOFF ADJ. CAR.
+############################################
+p <- ggplot(myfits, aes_string(x = param1, y = 'msd.payoff.adjusted.car', fill='payoff.bus'), color="white")
+p <- p + geom_bar(stat="identity", position="dodge")
+#
+if (param2 != "NONE") {
+  p <- p + facet_grid(reformulate(param2, "car.level"))
+} else {
+  p <- p + facet_grid(. ~ car.level)
+}
+#
+p <- p + xlab('epsilon') + ylab('Mean Squared Error Payoff Adjusted Car')
+p <- p + ggtitle(fileNamePrefix)
+if (!CLUSTER) {
+  p
+}
+
+# Saving file.
+filepath <- paste0(IMGDIRSIM, fileNamePrefix, '__msd-payoff-adj-car.jpg')
+ggsave(filepath)
 
 ## Create summary files
 
@@ -165,10 +208,17 @@ if (TRUE) {
   write.csv(mysummary, './summary_busshare.csv')
 
 
-  mysummary <- summarySE(fits, "payoff.adjusted", c("payoff.bus", "car.level", "round"), na.rm=TRUE)
+  mysummary <- summarySE(fits, "payoff.adjusted",
+                         c("payoff.bus", "car.level", "round", "epsilon"), na.rm=TRUE)
   mysummary$payoff.bus.num <- ifelse(mysummary$payoff.bus == "70", 70, 50)
 
-  write.csv(mysummary, './summary_payoffs.csv')
+  write.csv(mysummary, './summary_payoffs-adj.csv')
+
+  mysummary <- summarySE(fits, "payoff.adjusted.car",
+                         c("payoff.bus", "car.level", "round", "epsilon"), na.rm=TRUE)
+  mysummary$payoff.bus.num <- ifelse(mysummary$payoff.bus == "70", 70, 50)
+
+  write.csv(mysummary, './summary_payoffs-adj-car.csv')
 
 
   library(plm)
